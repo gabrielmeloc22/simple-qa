@@ -13,6 +13,7 @@ type Document struct {
 }
 
 type DocumentPostPayload struct {
+	SessionId string     `json:"sessionId"`
 	Documents []Document `json:"documents"`
 }
 
@@ -26,11 +27,17 @@ func (h *Handler) DocumentPost(c *gin.Context) {
 		return
 	}
 
+	if payload.SessionId == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "Session ID is required"})
+
+		return
+	}
+
 	docs := util.Map(payload.Documents, func(document Document) string {
 		return document.Text
 	})
 
-	_, err = core.ProcessDocuments(docs, h.VectorStore)
+	_, err = core.ProcessDocuments(payload.SessionId, docs, h.VectorStore)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Error processing documents"})

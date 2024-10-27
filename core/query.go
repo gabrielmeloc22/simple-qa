@@ -9,12 +9,13 @@ import (
 	"github.com/tmc/langchaingo/llms"
 	"github.com/tmc/langchaingo/llms/googleai"
 	"github.com/tmc/langchaingo/schema"
+	"github.com/tmc/langchaingo/vectorstores"
 	"github.com/tmc/langchaingo/vectorstores/weaviate"
 )
 
-func QueryDocument(query string, store *weaviate.Store, model *googleai.GoogleAI) (*string, error) {
+func QueryDocument(sessionId string, query string, store *weaviate.Store, model *googleai.GoogleAI) (*string, error) {
 	ctx := context.Background()
-	docs, err := store.SimilaritySearch(ctx, query, 5)
+	docs, err := store.SimilaritySearch(ctx, query, 5, vectorstores.WithNameSpace(sessionId))
 
 	if err != nil {
 		return nil, fmt.Errorf("error searching for similar documents: %w", err)

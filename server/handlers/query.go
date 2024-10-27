@@ -9,7 +9,8 @@ import (
 )
 
 type QueryPostPayload struct {
-	Query string `json:"query"`
+	SessionId string `json:"sessionId"`
+	Query     string `json:"query"`
 }
 
 func (h *Handler) QueryPost(c *gin.Context) {
@@ -22,7 +23,13 @@ func (h *Handler) QueryPost(c *gin.Context) {
 		return
 	}
 
-	response, err := core.QueryDocument(payload.Query, h.VectorStore, h.LanguageModel)
+	if payload.SessionId == "" {
+		c.JSON(http.StatusBadRequest, ErrorResponse{Error: "Session ID is required"})
+
+		return
+	}
+
+	response, err := core.QueryDocument(payload.SessionId, payload.Query, h.VectorStore, h.LanguageModel)
 
 	fmt.Printf("response: %s\n", err)
 
